@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Моя коллекция игр</title>
+<style>
+  /* ============ БАЗА ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-1: #0f0c29;
+    --bg-2: #1a1a3e;
+    --bg-3: #24243e;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --text: #e0e0e0;
+    --text-dim: #8888aa;
+    --accent: #f7971e;
+    --accent-2: #ffd200;
+    --green: #7ddf7d;
+    --red: #ff7d7d;
+    --blue: #8ab4ff;
+    --purple: #c88aff;
+  }
+
+  body.light {
+    --bg-1: #f4f4f8;
+    --bg-2: #e8e8f0;
+    --bg-3: #ffffff;
+    --card-bg: rgba(0,0,0,0.03);
+    --card-border: rgba(0,0,0,0.08);
+    --text: #1a1a2e;
+    --text-dim: #666677;
+  }
+
+  body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(145deg, var(--bg-1) 0%, var(--bg-2) 50%, var(--bg-3) 100%);
+    color: var(--text);
+    padding: 30px 20px 80px;
+    min-height: 100vh;
+    line-height: 1.6;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .container { max-width: 1300px; margin: 0 auto; }
+
+  /* ============ ЗАГОЛОВОК ============ */
+  header { text-align: center; margin-bottom: 30px; position: relative; }
+
+  h1 {
+    font-size: 3rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; letter-spacing: 2px;
+  }
+
+  .subtitle { color: var(--text-dim); font-style: italic; }
+
+  .theme-toggle {
+    position: absolute; top: 0; right: 0;
+    padding: 10px 16px; border-radius: 12px; cursor: pointer;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    color: var(--text); font-size: 1.2rem; transition: all 0.25s ease;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
+
+  /* ============ СТАТИСТИКА ============ */
+  .stats-panel {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 14px; padding: 18px; text-align: center;
+    transition: transform 0.25s ease, border-color 0.25s ease;
+  }
+  .stat-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--accent-2); }
+  .stat-label { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ============ ПАНЕЛЬ УПРАВЛЕНИЯ ============ */
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    padding: 18px; border-radius: 16px; margin-bottom: 20px;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+  }
+  .search-box { flex: 1 1 260px; position: relative; }
+  .search-box input {
+    width: 100%; padding: 11px 16px 11px 42px; border-radius: 12px;
+    border: 1px solid var(--card-border); background: rgba(0,0,0,0.2);
+    color: var(--text); font-size: 0.95rem; outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  body.light .search-box input { background: rgba(255,255,255,0.6); }
+  .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(247,151,30,0.15); }
+  .search-box .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.6; }
+
+  select, .btn {
+    padding: 10px 14px; border-radius: 12px; font-size: 0.88rem;
+    border: 1px solid var(--card-border); background: rgba(0,0,0,0.2);
+    color: var(--text); cursor: pointer; transition: all 0.2s ease;
+    font-family: inherit; font-weight: 600;
+  }
+  body.light select, body.light .btn { background: rgba(255,255,255,0.7); }
+  select:hover, .btn:hover { border-color: var(--accent); color: var(--accent-2); }
+
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #1a1a2e; border: none;
+  }
+  .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(247,151,30,0.4); }
+
+  /* ============ АКТИВНАЯ ИГРА ============ */
+  .now-playing {
+    background: linear-gradient(135deg, rgba(247,151,30,0.15), rgba(247,151,30,0.03));
+    border: 1px solid rgba(247,151,30,0.3);
+    border-radius: 16px; padding: 20px; margin-bottom: 24px;
+  }
+  .now-playing h2 { font-size: 1.1rem; color: var(--accent-2); margin-bottom: 12px; }
+  .now-playing-list { display: flex; flex-wrap: wrap; gap: 10px; }
+  .now-playing-item {
+    background: rgba(0,0,0,0.25); border-radius: 10px;
+    padding: 8px 14px; font-size: 0.9rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .now-playing-item button {
+    background: none; border: none; color: var(--red);
+    cursor: pointer; font-size: 1rem;
+  }
+  .empty-hint { color: var(--text-dim); font-size: 0.9rem; font-style: italic; }
+
+  /* ============ КАРТОЧКА СЕРИИ ============ */
+  .series-block {
+    margin-bottom: 22px; border-radius: 16px; overflow: hidden;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .series-block:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .series-block.hidden { display: none; }
+
+  .series-header {
+    padding: 16px 24px; cursor: pointer; user-select: none;
+    background: linear-gradient(90deg, rgba(247,151,30,0.15), transparent);
+    border-bottom: 1px solid rgba(247,151,30,0.15);
+    font-size: 1.25rem; font-weight: 700; color: var(--accent-2);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .series-header .icon { font-size: 1.5rem; }
+  .series-header .count-badge {
+    margin-left: auto; font-size: 0.78rem; padding: 4px 12px;
+    border-radius: 20px; background: rgba(247,151,30,0.15);
+    border: 1px solid rgba(247,151,30,0.3); white-space: nowrap;
+  }
+  .series-header .arrow { transition: transform 0.3s ease; opacity: 0.7; }
+  .series-block.collapsed .arrow { transform: rotate(-90deg); }
+  .series-block.collapsed .series-body { display: none; }
+
+  /* ============ КАРТОЧКА ИГРЫ ============ */
+  .game-item {
+    padding: 16px 24px; display: flex; gap: 18px; align-items: flex-start;
+    border-bottom: 1px solid var(--card-border);
+    transition: background 0.2s ease;
+  }
+  .game-item:last-child { border-bottom: none; }
+  .game-item:hover { background: rgba(255,255,255,0.03); }
+
+  .game-cover {
+    flex-shrink: 0; width: 130px; height: 70px;
+    border-radius: 10px; overflow: hidden;
+    background: linear-gradient(135deg, rgba(247,151,30,0.2), rgba(100,100,150,0.2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; position: relative;
+  }
+  .game-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+  .game-main { flex: 1; min-width: 0; }
+
+  .game-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 4px; }
+
+  .game-title { font-size: 1.05rem; font-weight: 700; }
+
+  .game-time {
+    padding: 4px 12px; border-radius: 8px; font-size: 0.78rem;
+    font-weight: 700; background: rgba(247,151,30,0.15);
+    border: 1px solid rgba(247,151,30,0.3); color: var(--accent-2);
+    white-space: nowrap;
+  }
+  .game-time.infinite { background: rgba(100,200,100,0.15); border-color: rgba(100,200,100,0.3); color: var(--green); }
+  .game-time.unknown { background: rgba(150,150,150,0.1); border-color: rgba(150,150,150,0.2); color: #999; }
+
+  .game-desc { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 8px; }
+
+  .game-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .tag {
+    font-size: 0.7rem; padding: 3px 10px; border-radius: 20px;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--card-border);
+    color: var(--text-dim); white-space: nowrap;
+  }
+  .tag.genre { background: rgba(100,150,255,0.12); border-color: rgba(100,150,255,0.25); color: var(--blue); }
+  .tag.mode { background: rgba(200,100,255,0.12); border-color: rgba(200,100,255,0.25); color: var(--purple); }
+
+  /* ============ СТАТУС И ОЦЕНКА ============ */
+  .game-controls {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding-top: 10px; border-top: 1px dashed var(--card-border);
+    margin-top: 10px;
+  }
+  .game-controls select { padding: 6px 10px; font-size: 0.8rem; }
+  .game-controls input[type="number"] {
+    width: 60px; padding: 6px 8px; border-radius: 8px;
+    border: 1px solid var(--card-border); background: rgba(0,0,0,0.2);
+    color: var(--text); font-size: 0.8rem;
+  }
+  body.light .game-controls input[type="number"] { background: rgba(255,255,255,0.7); }
+
+  /* Статусы */
+  .status-badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .status-not-started { background: rgba(150,150,150,0.2); color: #aaa; }
+  .status-playing { background: rgba(100,200,255,0.2); color: #8ad4ff; }
+  .status-completed { background: rgba(100,220,100,0.2); color: var(--green); }
+  .status-dropped { background: rgba(255,120,120,0.2); color: var(--red); }
+  .status-100 { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #1a1a2e; }
+
+  /* Звёзды */
+  .stars { display: inline-flex; gap: 2px; cursor: pointer; }
+  .star { font-size: 1rem; color: rgba(255,255,255,0.2); transition: color 0.15s ease; }
+  .star.active { color: var(--accent-2); }
+
+  /* Заметки */
+  .notes-toggle {
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 0.78rem; padding: 4px 8px;
+    border-radius: 8px; transition: all 0.2s ease;
+  }
+  .notes-toggle:hover { color: var(--accent-2); background: rgba(247,151,30,0.1); }
+
+  .game-notes {
+    display: none; margin-top: 10px; width: 100%;
+  }
+  .game-notes.visible { display: block; }
+  .game-notes textarea {
+    width: 100%; min-height: 60px; padding: 10px;
+    border-radius: 10px; border: 1px solid var(--card-border);
+    background: rgba(0,0,0,0.25); color: var(--text);
+    font-family: inherit; font-size: 0.85rem; resize: vertical;
+  }
+  body.light .game-notes textarea { background: rgba(255,255,255,0.7); }
+
+  /* Кнопки действий */
+  .icon-btn {
+    background: none; border: 1px solid var(--card-border);
+    color: var(--text-dim); cursor: pointer; padding: 4px 8px;
+    border-radius: 8px; font-size: 0.8rem; transition: all 0.2s ease;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent-2); }
+  .icon-btn.active { background: rgba(247,151,30,0.15); border-color: var(--accent); color: var(--accent-2); }
+
+  /* Прогресс-бар */
+  .progress-bar {
+    width: 100%; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.08); margin-top: 8px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.4s ease;
+  }
+
+  /* ============ МОДАЛЬНОЕ ОКНО ============ */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 1000;
+    align-items: center; justify-content: center; padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: var(--bg-3); border-radius: 18px; padding: 30px;
+    max-width: 500px; width: 100%; text-align: center;
+    border: 1px solid var(--card-border); position: relative;
+  }
+  .modal h2 { color: var(--accent-2); margin-bottom: 16px; font-size: 1.3rem; }
+  .modal .game-of-day {
+    font-size: 1.4rem; font-weight: 800; margin: 20px 0;
+    color: var(--text);
+  }
+  .modal .game-of-day-desc { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; }
+  .modal-close {
+    position: absolute; top: 12px; right: 16px;
+    background: none; border: none; color: var(--text-dim);
+    font-size: 1.5rem; cursor: pointer;
+  }
+  .modal-close:hover { color: var(--red); }
+
+  /* ============ ПОДВАЛ ============ */
+  .footer-note {
+    margin-top: 50px; padding: 20px; border-radius: 14px;
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    color: var(--text-dim); font-size: 0.9rem; text-align: center;
+  }
+  .footer-note strong { color: var(--accent-2); }
+
+  /* ============ АНИМАЦИЯ ПОЯВЛЕНИЯ ============ */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .series-block { animation: fadeInUp 0.4s ease backwards; }
+
+  /* ============ АДАПТИВ ============ */
+  @media (max-width: 700px) {
+    h1 { font-size: 1.9rem; }
+    .theme-toggle { position: static; margin-top: 10px; }
+    .game-item { flex-direction: column; }
+    .game-cover { width: 100%; height: 120px; }
+    .stats-panel { grid-template-columns: repeat(2, 1fr); }
+    .game-top { flex-direction: column; align-items: flex-start; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>🎮 Моя коллекция игр</h1>
+    <p class="subtitle">Личный трекер с прогрессом, оценками и заметками</p>
+    <button class="theme-toggle" id="theme-toggle" title="Сменить тему">🌙</button>
+  </header>
+
+  <!-- СТАТИСТИКА -->
+  <div class="stats-panel">
+    <div class="stat-card"><div class="stat-value" id="st-total">0</div><div class="stat-label">Всего игр</div></div>
+    <div class="stat-card"><div class="stat-value" id="st-series">0</div><div class="stat-label">Серий</div></div>
+    <div class="stat-card"><div class="stat-value" id="st-completed">0</div><div class="stat-label">Пройдено</div></div>
+    <div class="stat-card"><div class="stat-value" id="st-playing">0</div><div class="stat-label">В процессе</div></div>
+    <div class="stat-card"><div class="stat-value" id="st-hours">0ч</div><div class="stat-label">Отыграно</div></div>
+    <div class="stat-card"><div class="stat-value" id="st-progress">0%</div><div class="stat-label">Прогресс</div></div>
+  </div>
+
+  <!-- АКТИВНЫЕ ИГРЫ -->
+  <div class="now-playing" id="now-playing-block">
+    <h2>🎯 Сейчас играю</h2>
+    <div class="now-playing-list" id="now-playing-list">
+      <span class="empty-hint">Отметьте игру статусом «В процессе», чтобы она появилась здесь</span>
+    </div>
+  </div>
+
+  <!-- ПАНЕЛЬ ФИЛЬТРОВ -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input type="text" id="search" placeholder="Поиск по названию или описанию...">
+    </div>
+
+    <select id="filter-genre">
+      <option value="">Все жанры</option>
+    </select>
+
+    <select id="filter-status">
+      <option value="">Все статусы</option>
+      <option value="not-started">Не начата</option>
+      <option value="playing">В процессе</option>
+      <option value="completed">Пройдена</option>
+      <option value="100">Пройдена на 100%</option>
+      <option value="dropped">Брошена</option>
+    </select>
+
+    <select id="filter-time">
+      <option value="">Любое время</option>
+      <option value="short">До 10 ч</option>
+      <option value="medium">10–30 ч</option>
+      <option value="long">30–60 ч</option>
+      <option value="epic">60+ ч</option>
+      <option value="infinite">∞ Бесконечные</option>
+    </select>
+
+    <select id="sort-by">
+      <option value="default">По порядку</option>
+      <option value="title">По названию</option>
+      <option value="time">По времени</option>
+      <option value="rating">По оценке</option>
+      <option value="status">По статусу</option>
+    </select>
+
+    <button class="btn" id="random-btn" title="Случайная непройденная игра">🎲 Рандом</button>
+    <button class="btn" id="export-btn" title="Экспорт в JSON">💾 Экспорт</button>
+    <button class="btn" id="import-btn" title="Импорт из JSON">📂 Импорт</button>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+    <button class="btn" id="collapse-all">📁 Свернуть</button>
+    <button class="btn" id="reset-btn" title="Сбросить весь прогресс" style="color:var(--red)">🗑️ Сброс</button>
+  </div>
+
+  <!-- КОНТЕЙНЕР ИГР (заполняется JS) -->
+  <div id="games-container"></div>
+
+  <div class="footer-note">
+    <strong>💡 Прогресс сохраняется автоматически.</strong> Статус, оценка, заметки и время хранятся в вашем браузере (localStorage). Экспортируйте коллекцию, чтобы сделать резервную копию.
+  </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО РАНДОМА -->
+<div class="modal-overlay" id="random-modal">
+  <div class="modal">
+    <button class="modal-close" id="random-close">×</button>
+    <h2>🎲 Случайная игра</h2>
+    <div class="game-of-day" id="random-title">—</div>
+    <div class="game-of-day-desc" id="random-desc"></div>
+    <button class="btn primary" id="random-again">🎲 Ещё раз</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
